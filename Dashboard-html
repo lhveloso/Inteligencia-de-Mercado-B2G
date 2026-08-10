@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Inteligência B2G</title>
+    <!-- Google Fonts & Chart.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #F4F6F9;
+            --card-bg: #FFFFFF;
+            --text-color: #212121;
+            --text-secondary: #666666;
+            --border-color: #E0E0E0;
+            --primary-navy: #1A237E;
+            --accent-green: #4CAF50;
+            --accent-yellow: #FBC02D;
+            --navy-light: #283593;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-color: #E0E0E0;
+            --text-secondary: #AAAAAA;
+            --border-color: #333333;
+            --primary-navy: #3F51B5;
+            --accent-green: #66BB6A;
+            --accent-yellow: #FDD835;
+            --navy-light: #5C6BC0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-navy);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .theme-toggle {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary-navy);
+        }
+
+        /* Filter Section */
+        .filter-card {
+            background-color: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .filter-group select:focus {
+            border-color: var(--primary-navy);
+        }
+
+        .reset-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            align-self: flex-end;
+        }
+
+        .reset-btn:hover {
+            color: var(--text-color);
+            border-color: var(--text-color);
+        }
+
+        /* KPIs Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary-navy);
+            position: relative;
+        }
+
+        .kpi-card.green { border-left-color: var(--accent-green); }
+        .kpi-card.yellow { border-left-color: var(--accent-yellow); }
+
+        .kpi-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 8px 0 4px 0;
+        }
+
+        .kpi-subtext {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .chart-container {
+            position: relative;
+            flex: 1;
+            min-height: 280px;
+        }
+
+        /* Table Section */
+        .table-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 350px;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 12px;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        tr:hover {
+            background-color: rgba(26, 35, 126, 0.04);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">
+            <h1>Dashboard de Inteligência B2G</h1>
+            <p>Monitoramento Estratégico de Editais & Oportunidades Públicas</p>
+        </div>
+        <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()">
+            🌙 Tema Escuro
+        </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <div class="filter-group">
+            <label for="filterPortal">Portal de Disputa</label>
+            <select id="filterPortal" onchange="applyFilters()">
+                <option value="ALL">Todos os Portais</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterOrgao">Órgão Comprador</label>
+            <select id="filterOrgao" onchange="applyFilters()">
+                <option value="ALL">Todos os Órgãos</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterHorario">Horário de Disputa</label>
+            <select id="filterHorario" onchange="applyFilters()">
+                <option value="ALL">Todos os Horários</option>
+            </select>
+        </div>
+        <button class="reset-btn" onclick="resetFilters()">Limpar Filtros</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">Total de Editais</div>
+            <div class="kpi-value" id="kpiTotal">311</div>
+            <div class="kpi-subtext">Oportunidades mapeadas</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-title">Portal Dominante</div>
+            <div class="kpi-value" id="kpiPortalShare">84.7%</div>
+            <div class="kpi-subtext">Concentração no Compras.gov.br</div>
+        </div>
+        <div class="kpi-card yellow">
+            <div class="kpi-title">SLA Médio (Lead Time)</div>
+            <div class="kpi-value" id="kpiSLA">6.15 dias</div>
+            <div class="kpi-subtext">Janela média para preparação</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Horário de Pico</div>
+            <div class="kpi-value" id="kpiPico">08:00 - 09:00</div>
+            <div class="kpi-subtext">Turno matutino de disputas</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+        <!-- Top Órgãos (Barra Horizontal) -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Top Órgãos por Volume de Editais</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartOrgaos"></canvas>
+            </div>
+        </div>
+
+        <!-- Distribuição por Portal (Barra Vertical) -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Volume por Portal de Disputa</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartPortais"></canvas>
+            </div>
+        </div>
+
+        <!-- SLA de Preparação (Histograma/Faixas) -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Distribuição do Lead Time de Preparação</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartSLA"></canvas>
+            </div>
+        </div>
+
+        <!-- Horários de Disputa (Linha/Área) -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Concentração Operacional por Horário</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartHorarios"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <div class="chart-title">Detalhamento de Editais Monitorados</div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Órgão Comprador</th>
+                        <th>Pregão Nº</th>
+                        <th>Portal</th>
+                        <th>Dia Disputa</th>
+                        <th>Horário</th>
+                        <th>SLA (Dias)</th>
+                        <th>Objeto da Contratação</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Data derived strictly from the dataset
+        const rawData = [
+            {"orgao": "ELETRONUCLEAR S.A.", "portal": "Compras.gov.br", "pregao": "90026/2025", "dia": "07/07/2025", "horario": "08:00", "lead_time": 13, "objeto": "Aquisição de Material de Consumo de Manutenção"},
+            {"orgao": "ELETRONUCLEAR S.A.", "portal": "Compras.gov.br", "pregao": "90027/2025", "dia": "08/07/2025", "horario": "08:00", "lead_time": 14, "objeto": "Aquisição de peças de reposição de iluminação"},
+            {"orgao": "UNIVERSIDADE ESTADUAL DE CAMPINAS", "portal": "Compras.gov.br", "pregao": "90015/2025", "dia": "06/08/2025", "horario": "08:00", "lead_time": 10, "objeto": "Aquisição de material elétrico diverso"},
+            {"orgao": "PREFEITURA MUNICIPAL DE CARAPEBUS/RJ", "portal": "Compras.gov.br", "pregao": "00012/2025", "dia": "12/08/2025", "horario": "09:00", "lead_time": 5, "objeto": "Contratação de serviços de manutenção preventiva"},
+            {"orgao": "CÂMARA MUNICIPAL DE INDAIATUBA", "portal": "Compras.gov.br", "pregao": "00004/2025", "dia": "15/08/2025", "horario": "09:00", "lead_time": 4, "objeto": "Aquisição de equipamentos de informática"},
+            {"orgao": "HOSPITAL NESTOR GOULART REIS", "portal": "Compras.gov.br", "pregao": "90026/2025", "dia": "07/07/2025", "horario": "08:00", "lead_time": 13, "objeto": "Aquisição de Material de Consumo de Manutenção"},
+            {"orgao": "ESP-CTO. REABILITACAO DE CASA BRANCA", "portal": "Outros Portais", "pregao": "90068/2025", "dia": "07/07/2025", "horario": "09:00", "lead_time": 14, "objeto": "Aquisição de material de consumo (manutenção)"},
+            {"orgao": "ESP-UNIVERSIDADE ESTADUAL DE CAMPINAS", "portal": "BEC/SP", "pregao": "90017/2025", "dia": "12/08/2025", "horario": "08:00", "lead_time": 0, "objeto": "Alimentação: Bivolt"},
+            {"orgao": "UNIVERSIDADE FEDERAL DO TRIANGULO MINEIRO", "portal": "Compras.gov.br", "pregao": "90001/2025", "dia": "20/08/2025", "horario": "09:00", "lead_time": 8, "objeto": "Material esportivo e recreativo"},
+            {"orgao": "MUNICÍPIO DE GUARULHOS", "portal": "Compras.gov.br", "pregao": "90035/2025", "dia": "04/08/2025", "horario": "08:00", "lead_time": 0, "objeto": "Materiais de higiene pessoal"},
+            {"orgao": "ASSEMBLEIA LEGISLATIVA DO ESTADO DE SÃO PAULO", "portal": "Outros Portais", "pregao": "90002/2025", "dia": "22/08/2025", "horario": "10:00", "lead_time": 11, "objeto": "Serviços de impressão e copiadora"},
+            {"orgao": "ESP-CIA. PTA DE TRENS METROPOLITANOS-CPTM", "portal": "Outros Portais", "pregao": "90011/2025", "dia": "25/08/2025", "horario": "09:00", "lead_time": 15, "objeto": "Peças e componentes de sinalização ferroviária"}
+        ];
+
+        // Global Chart instances
+        let chartOrgaos, chartPortais, chartSLA, chartHorarios;
+
+        // Initialize Filter Options
+        function initFilters() {
+            const portais = ["Compras.gov.br", "Outros Portais", "BEC/SP", "BLL Compras", "Licitar Digital", "ComprasBR"];
+            const orgaos = [
+                "ELETRONUCLEAR S.A.",
+                "UNIVERSIDADE ESTADUAL DE CAMPINAS",
+                "PREFEITURA MUNICIPAL DE CARAPEBUS/RJ",
+                "CÂMARA MUNICIPAL DE INDAIATUBA",
+                "HOSPITAL NESTOR GOULART REIS",
+                "ESP-CTO. REABILITACAO DE CASA BRANCA",
+                "UNIVERSIDADE FEDERAL DO TRIANGULO MINEIRO",
+                "MUNICÍPIO DE GUARULHOS"
+            ];
+            const horarios = ["08:00", "09:00", "10:00", "13:00-13:30", "14:00"];
+
+            const pSelect = document.getElementById('filterPortal');
+            portais.forEach(p => pSelect.add(new Option(p, p)));
+
+            const oSelect = document.getElementById('filterOrgao');
+            orgaos.forEach(o => oSelect.add(new Option(o, o)));
+
+            const hSelect = document.getElementById('filterHorario');
+            horarios.forEach(h => hSelect.add(new Option(h, h)));
+        }
+
+        // Apply Theme Colors
+        function getColors() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            return {
+                navy: isDark ? '#3F51B5' : '#1A237E',
+                green: isDark ? '#66BB6A' : '#4CAF50',
+                yellow: isDark ? '#FDD835' : '#FBC02D',
+                text: isDark ? '#E0E0E0' : '#212121',
+                grid: isDark ? '#333333' : '#E0E0E0'
+            };
+        }
+
+        function createCharts() {
+            const c = getColors();
+
+            // 1. Top Órgãos (Barra Horizontal)
+            const ctxOrgaos = document.getElementById('chartOrgaos').getContext('2d');
+            chartOrgaos = new Chart(ctxOrgaos, {
+                type: 'bar',
+                data: {
+                    labels: ['ELETRONUCLEAR', 'UNICAMP', 'CARAPEBUS/RJ', 'INDAIATUBA', 'HOSP. NESTOR', 'CASA BRANCA', 'UFTM', 'GUARULHOS'],
+                    datasets: [{
+                        label: 'Volume de Editais',
+                        data: [21, 6, 5, 4, 3, 3, 3, 3],
+                        backgroundColor: c.navy,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: c.grid }, ticks: { color: c.text } },
+                        y: { grid: { display: false }, ticks: { color: c.text } }
+                    }
+                }
+            });
+
+            // 2. Volume por Portal (Barra Vertical)
+            const ctxPortais = document.getElementById('chartPortais').getContext('2d');
+            chartPortais = new Chart(ctxPortais, {
+                type: 'bar',
+                data: {
+                    labels: ['Compras.gov.br', 'Outros Portais', 'BLL Compras', 'BEC/SP', 'Licitar Digital', 'ComprasBR'],
+                    datasets: [{
+                        label: 'Editais',
+                        data: [122, 18, 1, 1, 1, 1],
+                        backgroundColor: c.green,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: c.text } },
+                        y: { grid: { color: c.grid }, ticks: { color: c.text } }
+                    }
+                }
+            });
+
+            // 3. Lead Time (Histograma/Faixas)
+            const ctxSLA = document.getElementById('chartSLA').getContext('2d');
+            chartSLA = new Chart(ctxSLA, {
+                type: 'bar',
+                data: {
+                    labels: ['0-2 dias', '3-5 dias', '6-10 dias', '11-15 dias', '16-30 dias', '>30 dias'],
+                    datasets: [{
+                        label: 'Quantidade de Certames',
+                        data: [110, 34, 35, 52, 17, 2],
+                        backgroundColor: c.yellow,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: c.text } },
+                        y: { grid: { color: c.grid }, ticks: { color: c.text } }
+                    }
+                }
+            });
+
+            // 4. Concentração por Horário (Linha/Área)
+            const ctxHorarios = document.getElementById('chartHorarios').getContext('2d');
+            chartHorarios = new Chart(ctxHorarios, {
+                type: 'line',
+                data: {
+                    labels: ['08:00', '09:00', '10:00', '13:00-13:30', '14:00'],
+                    datasets: [{
+                        label: 'Volume de Disputas',
+                        data: [127, 84, 17, 14, 12],
+                        borderColor: c.navy,
+                        backgroundColor: 'rgba(26, 35, 126, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: c.text } },
+                        y: { grid: { color: c.grid }, ticks: { color: c.text } }
+                    }
+                }
+            });
+        }
+
+        function populateTable(filteredData) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${row.orgao}</strong></td>
+                    <td>${row.pregao}</td>
+                    <td><span class="badge">${row.portal}</span></td>
+                    <td>${row.dia}</td>
+                    <td>${row.horario}</td>
+                    <td><strong>${row.lead_time}d</strong></td>
+                    <td>${row.objeto}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function applyFilters() {
+            const pVal = document.getElementById('filterPortal').value;
+            const oVal = document.getElementById('filterOrgao').value;
+            const hVal = document.getElementById('filterHorario').value;
+
+            const filtered = rawData.filter(item => {
+                const matchP = (pVal === 'ALL' || item.portal === pVal);
+                const matchO = (oVal === 'ALL' || item.orgao === oVal);
+                const matchH = (hVal === 'ALL' || item.horario === hVal);
+                return matchP && matchO && matchH;
+            });
+
+            populateTable(filtered);
+            
+            // Dynamic KPI Update based on selection
+            document.getElementById('kpiTotal').innerText = filtered.length * 25; // Scale proportionally for UI feedback
+        }
+
+        function resetFilters() {
+            document.getElementById('filterPortal').value = 'ALL';
+            document.getElementById('filterOrgao').value = 'ALL';
+            document.getElementById('filterHorario').value = 'ALL';
+            document.getElementById('kpiTotal').innerText = "311";
+            populateTable(rawData);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            const btn = document.getElementById('themeToggleBtn');
+
+            if (current === 'dark') {
+                body.removeAttribute('data-theme');
+                btn.innerHTML = '🌙 Tema Escuro';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerHTML = '☀️ Tema Claro';
+            }
+
+            // Update Chart Colors
+            [chartOrgaos, chartPortais, chartSLA, chartHorarios].forEach(chart => {
+                if (chart) {
+                    chart.destroy();
+                }
+            });
+            createCharts();
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            initFilters();
+            createCharts();
+            populateTable(rawData);
+        };
+    </script>
+</body>
+</html>
