@@ -1,0 +1,44 @@
+import pandas as pd
+import numpy as np
+
+# 1. Carregar base bruta
+df = pd.read_csv('Registro de Editais (respostas) - Respostas ao formulário 1 (1).csv')
+
+# 2. Eliminar colunas nulas/redundantes
+df_clean = df.drop(columns=['Endereço de e-mail', 'Coluna 12'])
+df_clean['Produtos_Unificado'] = df_clean['Produtos'].fillna(df_clean['Produtos.1'])
+df_clean = df_clean.drop(columns=['Produtos', 'Produtos.1'])
+
+# 3. Normalizar grafias dos Portais de Disputa
+def padronizar_portal(portal):
+    if pd.isna(portal):
+        return 'Não Informado'
+    portal_str = str(portal).lower().strip()
+    if any(k in portal_str for k in ['compras.gov', 'comprasnet', 'gov.br/compras']):
+        return 'Compras.gov.br'
+    elif 'bll' in portal_str:
+        return 'BLL Compras'
+    elif 'comprasbr' in portal_str:
+        return 'ComprasBR'
+    elif 'licitar.digital' in portal_str:
+        return 'Licitar Digital'
+    elif 'sp.gov.br' in portal_str:
+        return 'BEC/SP'
+    else:
+        return 'Outros Portais'
+
+df_clean['Portal_Padronizado'] = df_clean['Portal de Disputa'].apply(padronizar_portal)
+
+# 4. Tratamento de Datas e SLA (Lead Time)
+df_clean['Abertura_Propostas_dt'] = pd.to_datetime(df_clean['Abertura das Propostas'], format='%d/%m/%Y', errors='coerce')
+df_clean['Dia_Disputa_dt'] = pd.to_datetime(df_clean['Dia da Disputa'], format='%d/%m/%Y', errors='coerce')
+
+# Cálculo do Lead Time em dias
+df_clean['Lead_Time_Dias'] = (df_clean['Dia_Disputa_dt'] - df_clean['Abertura_Propostas_dt']).dt.days
+
+# Sanidade: Remover Outliers/Inconsistências (datas com Lead Time negativo)
+df_clean.loc[df_clean['Lead_Time_Dias'] < 0, 'Lead_Time_Dias'] = np.nan
+
+# 5. Exportação da base higienizada
+df_clean.to_csv('base_editais_tratada.csv', index=False)
+print("[OK] Base higienizada exportada com sucesso!")
