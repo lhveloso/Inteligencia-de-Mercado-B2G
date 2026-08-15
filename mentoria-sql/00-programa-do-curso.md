@@ -20,8 +20,9 @@ Cada semana tem uma pasta `semana-XX/` com:
 2. `exercicios.sql` — de 8 a 12 exercícios progressivos (fácil → difícil), sempre em cima de casos de negócio reais de inteligência de mercado (ex: "qual portal tem o melhor lead time médio?").
 3. `gabarito.sql` — soluções comentadas, só olhe depois de tentar.
 4. `entrevista.md` — 3 a 5 perguntas típicas de entrevista relacionadas ao tópico da semana (conceituais + "resolva na tela").
+5. `formula.md` — o "molde" da semana: a estrutura genérica com espaços em branco pra preencher, mais uma tabela de variações mostrando como o mesmo molde resolve pedidos diferentes.
 
-Todo módulo termina com uma pergunta de "e se..." para forçar raciocínio, não decoreba.
+Todo módulo termina com uma pergunta de "e se..." para forçar raciocínio, não decoreba — a ideia é que o molde vire reflexo, não texto decorado igual.
 
 ---
 

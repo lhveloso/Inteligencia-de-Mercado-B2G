@@ -133,6 +133,10 @@ Repare que `WHERE` acontece **antes** de `SELECT` — por isso você não pode u
 
 ---
 
+## Cola rápida
+
+Se você prefere fixar por "fórmula" e ir variando as peças, veja [`formula.md`](formula.md) — é o molde de `SELECT/WHERE/ORDER BY/LIMIT` desta semana com exemplos prontos pra adaptar.
+
 ## Agora vá para `exercicios.sql`
 
 Tente resolver todos antes de olhar `gabarito.sql`. Quando terminar (ou travar), me chame no chat e resolvemos juntos, explicando o raciocínio.
